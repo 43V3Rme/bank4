@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+
+        .header {
+            font-size: 40px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #999;
+            text-align: center;
+            padding-top: 50px;
+            margin-bottom: 30px;
+        }   
+
+        .content {
+            min-height: 100px;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .input-group {
+            display: inline-block;
+            margin: 0 auto;
+            margin-bottom: 30px;
+        }
+
+        .input-group input {
+            outline: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            background: #eee;
+            color: #888;
+            font-size: 16px;
+            border: none;
+        }
+
+        #history_button {
+            outline: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            background: #eee;
+            color: #888;
+            font-size: 16px;
+            border: none;
+
+        }
+
+        .input-group button {
+            padding: 6px 15px;
+            font-size: 17px;
+            color: white;
+            background: rgb(59, 198, 252);
+            border: none;
+        }
+        #history_button {
+            outline: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            background: #eee;
+            color: #888;
+            font-size: 16px;
+            border: none;
+            height: 30px;
+            width: 30px;
+        }
+        
+        #scoring_button {
+            outline: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            background: #eee;
+            color: #888;
+            font-size: 16px;
+            border: none;
+            height: 30px;
+            width: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">Zypl credit </div>
+    <div class="content">
+        <div class="input-group">
+            <input type="text" id="inn">
+            <button id="submit">Submit</button>
+            <div id="info"></div>
+            <div class = "checkbox1">
+                <input type="checkbox" id="history_button" value="history">
+                <label for="history">History</label>
+            </div>
+            <div class = "checkbox2">
+                <input type="checkbox" id="scoring_button"  value="scoring">
+                <label for="scoring">Scoring</label>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const input = document.querySelector('#inn');
+        const container = document.querySelector('#info');
+        const hist = document.querySelector('#history_button');
+        const score = document.querySelector('#scoring_button');
+        // hist.addEventListener('change', () => {
+
+        // })
+        const sendData = () => {
+            fetch(`http://localhost:5000/users?INN=${input.value}&hist=${hist.checked}&score=${score.checked}`)
+            .then(res => res.json())
+            .then(res => {
+                if(hist.checked == true)
+                    if (res != "ERROR"){
+                        var tbltop = `<table>;
+                        <tr><th>Variable</th><th>Value</th>`;
+                        var main = "";
+                        var k = 0;
+                        var s = "";
+                        for(i = 0; i < res.length; i++){
+                            if (res[i] == ','){
+                                k++;
+                                if(k == 1){
+                                    main +="<tr><th>Amount:</td><th><td>"+s+"</td><td>";
+                                }
+                                if(k == 2){    
+                                    main +="<tr><th>data taken:</td><th><td>"+s+"</td><td>";
+                                }
+                                if(k == 3){    
+                                    main +="<tr><th>data end:</td><th><td>"+s+"</td><td>";
+                                }
+                                if(score.checked == true && k == 4){
+                                    main +="<tr><th>delinquencies:</td><th><td>"+s+"</td><td>";
+                                }
+                                s = ""; 
+                            }
+                            else s += res[i];
+                        }
+                        if(score.checked == false)main +="<tr><th>delinquencies:</td><th><td>"+s+"</td><td>";
+                            else main += "<tr><th>score:</td><th><td>"+s+"</td><td>";
+                        var tblbottom = "</table>";
+                        var tbl = tbltop + main + tblbottom;
+                        container.innerHTML = tbl;
+                    }
+                    else {
+                        container.innerHTML = "No INN";
+                    }
+                else {
+                    if (score.checked == true) {
+                        if(res == "ERROR"){
+                            container.innerHTML = "No INN";
+                        }
+                        else {
+                            var str = ""
+                            for(i = 0; i < res.length; i++){
+                                str += res[i];
+                                if(res[i] == ',')str = "";
+                            }
+                            var tbltop = `<table><tr><th>Variable</th><th>Value</th>`; 
+                            var main ="<tr><th>score:</td><th><td>"+str+"</td><td>"; 
+                            var tblbottom = "</table>";
+                            var tbl = tbltop + main + tblbottom;
+                            container.innerHTML = tbl;
+                        }
+                    }
+                    else container.innerHTML = "Choose something!"
+                }             
+            })
+            .catch(err => console.log(err));
+        }
+        document.querySelector('#submit').addEventListener('click', () => sendData());
+        document
+    </script>
+</body>
+</html>
